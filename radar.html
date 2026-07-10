@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  body { margin: 0; background: transparent; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<canvas id="radar" width="300" height="300"></canvas>
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const n1 = parseFloat(params.get('n1')) || 0;
+  const n2 = parseFloat(params.get('n2')) || 0;
+  const n3 = parseFloat(params.get('n3')) || 0;
+  const n4 = parseFloat(params.get('n4')) || 0;
+  const nt = parseFloat(params.get('nt')) || 0;
+
+  const canvas = document.getElementById('radar');
+  const ctx = canvas.getContext('2d');
+  const cx = 150; const cy = 150; const r = 110;
+  const labels = ['Nivel 1','Nivel 2','Nivel 3','Nivel 4','Transversal'];
+  const values = [n1, n2, n3, n4, nt];
+  const angles = values.map((_, i) => (i * 2 * Math.PI / 5) - Math.PI / 2);
+
+  // Círculos de fondo
+  [25, 50, 75, 100].forEach(pct => {
+    ctx.beginPath();
+    angles.forEach((a, i) => {
+      const x = cx + r * (pct/100) * Math.cos(a);
+      const y = cy + r * (pct/100) * Math.sin(a);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.closePath();
+    ctx.strokeStyle = '#ddd';
+    ctx.stroke();
+  });
+
+  // Ejes
+  angles.forEach(a => {
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + r * Math.cos(a), cy + r * Math.sin(a));
+    ctx.strokeStyle = '#ccc';
+    ctx.stroke();
+  });
+
+  // Datos
+  ctx.beginPath();
+  values.forEach((v, i) => {
+    const x = cx + r * (v/100) * Math.cos(angles[i]);
+    const y = cy + r * (v/100) * Math.sin(angles[i]);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(139,30,45,0.3)';
+  ctx.fill();
+  ctx.strokeStyle = '#8B1E2D';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Etiquetas
+  ctx.fillStyle = '#333';
+  ctx.font = '11px Arial';
+  ctx.textAlign = 'center';
+  labels.forEach((l, i) => {
+    const x = cx + (r + 20) * Math.cos(angles[i]);
+    const y = cy + (r + 20) * Math.sin(angles[i]);
+    ctx.fillText(l, x, y);
+    ctx.fillText(values[i].toFixed(1) + '%', x, y + 13);
+  });
+</script>
+</body>
+</html>
